@@ -1,0 +1,1935 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+    <title>洛克王国：世界 - 小窝排布计算器</title>
+    <style>
+        /* ==================== 基础样式 ==================== */
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+            min-height: 100vh;
+            padding: 12px;
+            overflow-x: hidden;
+        }
+
+        .page-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 8px;
+            color: #2d3748;
+            font-size: 22px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #718096;
+            margin-bottom: 16px;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        /* ==================== 输入面板 ==================== */
+        .input-panel {
+            background: white;
+            padding: 16px;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            margin-bottom: 16px;
+        }
+
+        .input-section {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex: 1;
+            min-width: 100px;
+            max-width: 120px;
+        }
+
+        .input-group label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        .input-group input[type="number"] {
+            width: 100%;
+            padding: 10px 8px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #2d3748;
+            outline: none;
+            text-align: center;
+            -webkit-appearance: none;
+        }
+
+        .input-group input[type="number"]:focus {
+            border-color: #667eea;
+        }
+
+        .input-group input[type="number"]:disabled {
+            background: #f7fafc;
+            color: #718096;
+        }
+
+        .input-hint {
+            font-size: 10px;
+            color: #a0aec0;
+            text-align: center;
+        }
+
+        .button-group {
+            flex: 0 0 auto;
+            min-width: auto;
+            max-width: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+
+        .btn-solve {
+            padding: 12px 28px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            justify-content: center;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-solve:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.35);
+        }
+
+        .btn-solve:active {
+            transform: scale(0.98);
+        }
+
+        .btn-solve:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* ==================== 统计面板 ==================== */
+        .stats-panel {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            color: white;
+            display: none;
+        }
+
+        .stats-panel.visible {
+            display: block;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 12px 8px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-item.full-width {
+            grid-column: span 3;
+            display: flex;
+            justify-content: space-around;
+            padding: 12px;
+        }
+
+        .stat-item .number {
+            font-size: 26px;
+            font-weight: 700;
+            margin-bottom: 3px;
+        }
+
+        .stat-item .label {
+            font-size: 11px;
+            opacity: 0.9;
+        }
+
+        .stat-item.optimal {
+            background: rgba(72, 187, 120, 0.4);
+        }
+
+        /* ==================== 可视化面板 ==================== */
+        .visualization-panel {
+            background: white;
+            padding: 16px;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            margin-bottom: 16px;
+            display: none;
+            touch-action: pan-y;
+            user-select: none;
+        }
+
+        .visualization-panel.visible {
+            display: block;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .panel-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .control-hint {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: #718096;
+            flex-wrap: wrap;
+        }
+
+        .key-group {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        kbd {
+            background: #edf2f7;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-weight: bold;
+            color: #4a5568;
+            border-bottom: 2px solid #cbd5e0;
+            font-size: 11px;
+        }
+
+        .viz-container {
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            overflow: auto;
+            background: #fafbfc;
+            min-height: 500px;
+            max-height: none;
+            height: auto;
+        }
+
+        .viz-container svg {
+            min-height: 500px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn-secondary {
+            flex: 1;
+            min-width: 100px;
+            padding: 10px 16px;
+            background: #edf2f7;
+            color: #4a5568;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary:hover {
+            background: #e2e8f0;
+        }
+
+        .btn-secondary:active {
+            transform: scale(0.98);
+        }
+
+        /* ==================== 连接列表 ==================== */
+        .connections-panel {
+            background: white;
+            padding: 16px;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            display: none;
+            margin-bottom: 16px;
+        }
+
+        .connections-panel.visible {
+            display: block;
+        }
+
+        .connections-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 8px;
+            max-height: 250px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+
+        .connection-item {
+            background: #f7fafc;
+            padding: 10px 12px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+        }
+
+        .connection-item .type0 { color: #2b6cb0; font-weight: 600; }
+        .connection-item .type1 { color: #c53030; font-weight: 600; }
+        .connection-item .dist { color: #38a169; font-weight: bold; }
+
+        /* ==================== 小窝样式 ==================== */
+        .selectable-square {
+            cursor: pointer;
+            transition: filter 0.2s;
+        }
+
+        .selectable-square:hover {
+            filter: brightness(1.1);
+        }
+
+        .selectable-square:active {
+            cursor: grabbing;
+        }
+
+        .selectable-square.selected {
+            filter: brightness(1.15) drop-shadow(0 0 10px rgba(255,215,0,0.8));
+        }
+
+        .selectable-square.invalid {
+            stroke: #e53e3e;
+            filter: brightness(0.9);
+        }
+
+        /* ==================== 进度遮罩 ==================== */
+        .progress-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+
+        .progress-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .progress-box {
+            background: white;
+            padding: 35px;
+            border-radius: 16px;
+            text-align: center;
+            width: 85%;
+            max-width: 320px;
+        }
+
+        .progress-spinner {
+            width: 55px;
+            height: 55px;
+            border: 4px solid #e2e8f0;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .progress-text {
+            font-size: 17px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 8px;
+        }
+
+        .progress-detail {
+            font-size: 13px;
+            color: #718096;
+            margin-bottom: 16px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 4px;
+            transition: width 0.3s;
+            width: 0%;
+        }
+
+        /* ==================== 说明面板 ==================== */
+        .info-panel {
+            background: white;
+            padding: 18px;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        }
+
+        .info-panel h3 {
+            font-size: 17px;
+            color: #2d3748;
+            margin-bottom: 14px;
+        }
+
+        .info-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .info-card {
+            background: #f7fafc;
+            padding: 14px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .info-card h4 {
+            font-size: 14px;
+            color: #2d3748;
+            margin-bottom: 8px;
+        }
+
+        .info-card p {
+            font-size: 13px;
+            color: #718096;
+            line-height: 1.6;
+        }
+
+        .drag-hint {
+            background: #ebf8ff;
+            border: 1px solid #90cdf4;
+            color: #2b6cb0;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            text-align: center;
+            margin-bottom: 12px;
+        }
+
+        /* ==================== 响应式样式 ==================== */
+        @media (min-width: 769px) {
+            body {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 28px;
+                margin-bottom: 10px;
+            }
+
+            .subtitle {
+                font-size: 15px;
+                margin-bottom: 25px;
+            }
+
+            .input-panel {
+                padding: 25px;
+                margin-bottom: 25px;
+            }
+
+            .input-section {
+                gap: 20px;
+            }
+
+            .input-group {
+                min-width: 120px;
+                max-width: 140px;
+            }
+
+            .input-group label {
+                font-size: 14px;
+            }
+
+            .input-group input[type="number"] {
+                padding: 12px 14px;
+            }
+
+            .input-hint {
+                font-size: 12px;
+            }
+
+            .btn-solve {
+                padding: 14px 36px;
+                font-size: 16px;
+            }
+
+            .stats-panel {
+                padding: 20px 25px;
+                margin-bottom: 25px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+                gap: 15px;
+            }
+
+            .stat-item {
+                padding: 18px 12px;
+            }
+
+            .stat-item .number {
+                font-size: 32px;
+            }
+
+            .stat-item .label {
+                font-size: 13px;
+            }
+
+            .stat-item.full-width {
+                grid-column: auto;
+                display: block;
+            }
+
+            .visualization-panel {
+                padding: 25px;
+                margin-bottom: 25px;
+            }
+
+            .panel-header {
+                margin-bottom: 20px;
+            }
+
+            .panel-title {
+                font-size: 18px;
+            }
+
+            .control-hint {
+                gap: 15px;
+                font-size: 13px;
+            }
+
+            .viz-container {
+                min-height: 400px;
+                max-height: 70vh;
+            }
+
+            .connections-panel {
+                padding: 25px;
+                margin-bottom: 25px;
+            }
+
+            .connections-list {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                max-height: 300px;
+            }
+
+            .info-panel {
+                padding: 25px;
+            }
+
+            .info-panel h3 {
+                font-size: 18px;
+            }
+
+            .info-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                flex-direction: row;
+            }
+
+            .info-card {
+                padding: 20px;
+            }
+
+            .info-card h4 {
+                font-size: 15px;
+            }
+
+            .info-card p {
+                font-size: 14px;
+            }
+
+            .drag-hint {
+                display: none;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .input-group {
+                min-width: 70px;
+            }
+
+            h1 {
+                font-size: 18px;
+            }
+
+            .subtitle {
+                font-size: 11px;
+            }
+
+            .btn-solve {
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-container">
+        <h1>🏠 洛克王国：世界 - 小窝排布计算器</h1>
+        <p class="subtitle">在家园中摆放精灵小窝，最大化异性精灵之间的配对数</p>
+
+        <!-- 输入面板 -->
+        <div class="input-panel">
+            <div class="input-section">
+                <div class="input-group">
+                    <label>小窝总数</label>
+                    <input type="number" id="input-n" min="2" max="20" value="10">
+                    <span class="input-hint">2-10个</span>
+                </div>
+                <div class="input-group">
+                    <label>雌性精灵(♀)</label>
+                    <input type="number" id="input-k" min="1" max="20" value="5">
+                    <span class="input-hint" id="hint-k"></span>
+                </div>
+                <div class="input-group">
+                    <label>雄性精灵(♂)</label>
+                    <input type="number" id="input-m" min="1" max="49" value="5" disabled>
+                    <span class="input-hint">自动计算</span>
+                </div>
+                <div class="input-group button-group">
+                    <label>&nbsp;</label>
+                    <button class="btn-solve" id="btn-solve" onclick="startSolving()">
+                        <span>🚀</span> 计算最优排布
+                    </button>
+                    <span class="input-hint">&nbsp;</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 统计面板 -->
+        <div class="stats-panel" id="stats-panel">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="number" id="stat-n">-</div>
+                    <div class="label">小窝总数</div>
+                </div>
+                <div class="stat-item">
+                    <div class="number" id="stat-k">-</div>
+                    <div class="label">雌性(♀)</div>
+                </div>
+                <div class="stat-item">
+                    <div class="number" id="stat-m">-</div>
+                    <div class="label">雄性(♂)</div>
+                </div>
+                <div class="stat-item" id="stat-edges-item">
+                    <div class="number" id="stat-edges">-</div>
+                    <div class="label">有效配对数</div>
+                </div>
+                <div class="stat-item">
+                    <div class="number" id="stat-ratio">-</div>
+                    <div class="label">配对达成率</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 可视化面板 -->
+        <div class="visualization-panel" id="viz-panel">
+            <div class="panel-header">
+                <div class="panel-title">📐 小窝排布可视化</div>
+                <div class="control-hint">
+                    <div class="action-buttons">
+                        <button class="btn-secondary" onclick="resetSolution()">🔄 重置</button>
+                        <button class="btn-secondary" onclick="exportSolution()">💾 导出</button>
+                    </div>
+                </div>
+            </div>
+            <div class="drag-hint">👆 点击选中小窝，拖拽移动位置</div>
+            <div class="viz-container" id="viz-container"></div>
+        </div>
+
+        <!-- 连接列表 -->
+        <div class="connections-panel" id="connections-panel">
+            <div class="panel-title">🔗 可生蛋配对详情 (曼哈顿距离 ≤ 5)</div>
+            <div class="connections-list" id="connections-list"></div>
+        </div>
+
+        <!-- 说明面板 -->
+        <div class="info-panel">
+            <h3>📚 使用说明</h3>
+            <div class="info-grid">
+                <div class="info-card">
+                    <h4>问题背景</h4>
+                    <p>在《洛克王国：世界》的家园系统中，摆放精灵小窝并让精灵入住后，如果异性精灵（雌性和雄性）小窝中心距离 ≤ 5，就有机会交配产下精灵蛋。生蛋冷却结束后，蛋必须被取走雌性才能继续生蛋。</p>
+                </div>
+                <div class="info-card">
+                    <h4>优化目标</h4>
+                    <p>最大化异性精灵之间的有效配对数量。理论上最大配对数为 雌性数 × 雄性数。达成率越高，整体生蛋效率越高，获得精灵蛋的机会越多。</p>
+                </div>
+                <div class="info-card">
+                    <h4>小窝摆放规则</h4>
+                    <p>每个精灵小窝占据 2×2 的平面区域，小窝之间不能重叠。</p>
+                </div>
+                <div class="info-card">
+                    <h4>交互操作</h4>
+                    <p>点击选中小窝并拖拽移动位置。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 进度遮罩 -->
+    <div class="progress-overlay" id="progress-overlay">
+        <div class="progress-box">
+            <div class="progress-spinner"></div>
+            <div class="progress-text" id="progress-text">正在计算最优排布...</div>
+            <div class="progress-detail" id="progress-detail">初始化搜索算法...</div>
+            <div class="progress-bar">
+                <div class="progress-bar-fill" id="progress-bar-fill"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== 工具函数 (utils.js) ====================
+        // 计算曼哈顿距离
+        function manhattanDistance(p1, p2) {
+            return Math.abs(p1[0] - p2[0]) + Math.abs(p1[1] - p2[1]);
+        }
+
+        // 计算切比雪夫距离
+        function chebyshevDistance(p1, p2) {
+            return Math.max(Math.abs(p1[0] - p2[0]), Math.abs(p1[1] - p2[1]));
+        }
+
+        // 检查是否重叠（切比雪夫距离 < 2）
+        function isOverlapping(p1, p2) {
+            return chebyshevDistance(p1, p2) < 2;
+        }
+
+        // 计算连接数
+        function countEdges(type0, type1) {
+            let count = 0;
+            for (const p0 of type0) {
+                for (const p1 of type1) {
+                    if (manhattanDistance(p0, p1) <= 5) {
+                        count++;
+                    }
+                }
+            }
+            return count;
+        }
+
+        // 获取所有连接详情
+        function getConnections(type0, type1) {
+            const connections = [];
+            for (let i = 0; i < type0.length; i++) {
+                for (let j = 0; j < type1.length; j++) {
+                    const d = manhattanDistance(type0[i], type1[j]);
+                    if (d <= 5) {
+                        connections.push({
+                            type0Index: i,
+                            type1Index: j,
+                            type0Pos: type0[i],
+                            type1Pos: type1[j],
+                            distance: d
+                        });
+                    }
+                }
+            }
+            return connections;
+        }
+
+        // 坐标归一化
+        function normalizeCoordinates(type0, type1) {
+            if (type0.length === 0 && type1.length === 0) {
+                return { type0: [], type1: [] };
+            }
+            const allPoints = [...type0, ...type1];
+            const minX = Math.min(...allPoints.map(p => p[0]));
+            const minY = Math.min(...allPoints.map(p => p[1]));
+            const offsetX = Math.min(0, minX);
+            const offsetY = Math.min(0, minY);
+            return {
+                type0: type0.map(p => [p[0] - offsetX, p[1] - offsetY]),
+                type1: type1.map(p => [p[0] - offsetX, p[1] - offsetY])
+            };
+        }
+
+        // ==================== 求解器配置参数 ====================
+        const BOUNDARY_BASE = 20;
+        const BOUNDARY_SCALE = 1.6;
+        const SOLVER_ATTEMPTS_BASE = 20;
+        const SOLVER_ATTEMPTS_LARGE = 10;
+        const PERTURB_MIN_POINTS = 2;
+        const PERTURB_MAX_POINTS = 5;
+        const SA_INITIAL_TEMP = 15.0;
+        const SA_COOLING_RATE = 0.997;
+        const SA_MIN_TEMP = 0.001;
+        const SA_MAX_ITERATIONS = 8000;
+        const SA_MOVE_PROB = 0.7;
+        const SA_SWAP_PROB = 0.9;
+        const SA_PERTURB_PROB = 1.0;
+        const SA_MAX_NO_IMPROVE = 3200;
+        const LOCAL_MAX_ITERATIONS = 800;
+        const LOCAL_SEARCH_RANGE = 3;
+        const CHEBYSHEV_DISTANCE = 2;
+        const MANHATTAN_THRESHOLD = 5;
+
+        // ==================== 邻域生成函数 ====================
+        function getChebyshev2Candidates(allPoints, targetIdx, boundary) {
+            const pos = allPoints[targetIdx];
+            const others = [...allPoints.slice(0, targetIdx), ...allPoints.slice(targetIdx + 1)];
+            const candidates = [];
+
+            const chebyshev2Offsets = [];
+            for (let dx = -CHEBYSHEV_DISTANCE; dx <= CHEBYSHEV_DISTANCE; dx++) {
+                for (let dy = -CHEBYSHEV_DISTANCE; dy <= CHEBYSHEV_DISTANCE; dy++) {
+                    if (Math.max(Math.abs(dx), Math.abs(dy)) === CHEBYSHEV_DISTANCE) {
+                        chebyshev2Offsets.push([dx, dy]);
+                    }
+                }
+            }
+
+            for (const other of allPoints) {
+                for (const [dx, dy] of chebyshev2Offsets) {
+                    const candidate = [other[0] + dx, other[1] + dy];
+                    if (candidate[0] < 0 || candidate[0] > boundary ||
+                        candidate[1] < 0 || candidate[1] > boundary) continue;
+                    if (candidate[0] === pos[0] && candidate[1] === pos[1]) continue;
+
+                    let overlap = false;
+                    for (const p of allPoints) {
+                        if (isOverlapping(candidate, p)) {
+                            overlap = true;
+                            break;
+                        }
+                    }
+                    if (overlap) continue;
+
+                    let overlapOthers = false;
+                    for (const o of others) {
+                        if (isOverlapping(candidate, o)) {
+                            overlapOthers = true;
+                            break;
+                        }
+                    }
+                    if (overlapOthers) continue;
+
+                    const exists = candidates.some(c => c[0] === candidate[0] && c[1] === candidate[1]);
+                    if (!exists) candidates.push(candidate);
+                }
+            }
+            return candidates;
+        }
+
+        function generateNeighbor(type0, type1, k, boundary) {
+            const c0 = type0.map(p => [...p]);
+            const c1 = type1.map(p => [...p]);
+            const allPoints = [...c0, ...c1];
+            if (allPoints.length === 0) return null;
+
+            const idx = Math.floor(Math.random() * allPoints.length);
+            const others = [...allPoints.slice(0, idx), ...allPoints.slice(idx + 1)];
+
+            const candidates = getChebyshev2Candidates(allPoints, idx, boundary);
+            if (candidates.length === 0) return null;
+
+            const newPos = candidates[Math.floor(Math.random() * candidates.length)];
+            const newAll = [...others.slice(0, idx), newPos, ...others.slice(idx)];
+
+            return { type0: newAll.slice(0, k), type1: newAll.slice(k) };
+        }
+
+        function swapTypes(type0, type1) {
+            if (type0.length === 0 || type1.length === 0) return null;
+            const c0 = type0.map(p => [...p]);
+            const c1 = type1.map(p => [...p]);
+            const i = Math.floor(Math.random() * c0.length);
+            const j = Math.floor(Math.random() * c1.length);
+            [c0[i], c1[j]] = [c1[j], c0[i]];
+            return { type0: c0, type1: c1 };
+        }
+
+        function randomPerturbation(type0, type1, k, boundary) {
+            const c0 = type0.map(p => [...p]);
+            const c1 = type1.map(p => [...p]);
+            const allPoints = [...c0, ...c1];
+            const n = allPoints.length;
+            if (n < 2) return null;
+
+            const numToMove = Math.floor(Math.random() * (PERTURB_MAX_POINTS - PERTURB_MIN_POINTS + 1)) + PERTURB_MIN_POINTS;
+            const indices = [];
+            while (indices.length < numToMove && indices.length < n) {
+                const idx = Math.floor(Math.random() * n);
+                if (!indices.includes(idx)) indices.push(idx);
+            }
+
+            const newPositions = [];
+            let tempOthers = allPoints.filter((_, i) => !indices.includes(i));
+
+            const chebyshev2Offsets = [];
+            for (let dx = -CHEBYSHEV_DISTANCE; dx <= CHEBYSHEV_DISTANCE; dx++) {
+                for (let dy = -CHEBYSHEV_DISTANCE; dy <= CHEBYSHEV_DISTANCE; dy++) {
+                    if (Math.max(Math.abs(dx), Math.abs(dy)) === CHEBYSHEV_DISTANCE) {
+                        chebyshev2Offsets.push([dx, dy]);
+                    }
+                }
+            }
+
+            for (const idx of indices) {
+                const currentAll = [...tempOthers, ...indices.filter(i => i !== idx).map(i => allPoints[i])];
+                const candidates = [];
+                for (const other of currentAll) {
+                    for (const [dx, dy] of chebyshev2Offsets) {
+                        const candidate = [other[0] + dx, other[1] + dy];
+                        if (candidate[0] < 0 || candidate[0] > boundary ||
+                            candidate[1] < 0 || candidate[1] > boundary) continue;
+                        if (candidate[0] === allPoints[idx][0] && candidate[1] === allPoints[idx][1]) continue;
+
+                        let overlap = false;
+                        for (const p of currentAll) {
+                            if (isOverlapping(candidate, p)) {
+                                overlap = true;
+                                break;
+                            }
+                        }
+                        if (!overlap) {
+                            const exists = candidates.some(c => c[0] === candidate[0] && c[1] === candidate[1]);
+                            if (!exists) candidates.push(candidate);
+                        }
+                    }
+                }
+                if (candidates.length === 0) return null;
+                const newPos = candidates[Math.floor(Math.random() * candidates.length)];
+                newPositions.push([idx, newPos]);
+                tempOthers.push(newPos);
+            }
+
+            const newAll = allPoints.map(p => [...p]);
+            for (const [idx, newPos] of newPositions) {
+                newAll[idx] = newPos;
+            }
+            return { type0: newAll.slice(0, k), type1: newAll.slice(k) };
+        }
+
+        // ==================== 模拟退火 ====================
+        function saOptimize(type0, type1, k, boundary, initialTemp, coolingRate, minTemp, maxIter) {
+            let currentT0 = type0.map(p => [...p]);
+            let currentT1 = type1.map(p => [...p]);
+            let currentEdges = countEdges(currentT0, currentT1);
+
+            let bestT0 = currentT0.map(p => [...p]);
+            let bestT1 = currentT1.map(p => [...p]);
+            let bestEdges = currentEdges;
+
+            const theoreticalBest = k * (type0.length + type1.length - k);
+            let temp = initialTemp;
+            let noImprove = 0;
+
+            for (let iteration = 0; iteration < maxIter; iteration++) {
+                if (temp < minTemp) break;
+                if (bestEdges >= theoreticalBest) break;
+
+                const r = Math.random();
+                let neighbor = null;
+
+                if (r < SA_MOVE_PROB) {
+                    neighbor = generateNeighbor(currentT0, currentT1, k, boundary);
+                } else if (r < SA_SWAP_PROB && k > 0 && type1.length > 0) {
+                    neighbor = swapTypes(currentT0, currentT1);
+                } else {
+                    neighbor = randomPerturbation(currentT0, currentT1, k, boundary);
+                }
+
+                if (neighbor === null) continue;
+
+                const newT0 = neighbor.type0;
+                const newT1 = neighbor.type1;
+                const newEdges = countEdges(newT0, newT1);
+                const delta = newEdges - currentEdges;
+
+                if (delta > 0) {
+                    currentT0 = newT0.map(p => [...p]);
+                    currentT1 = newT1.map(p => [...p]);
+                    currentEdges = newEdges;
+                    noImprove = 0;
+                    if (newEdges > bestEdges) {
+                        bestT0 = newT0.map(p => [...p]);
+                        bestT1 = newT1.map(p => [...p]);
+                        bestEdges = newEdges;
+                        if (bestEdges >= theoreticalBest) break;
+                    }
+                } else if (temp > 0) {
+                    const acceptProb = Math.exp(delta / temp);
+                    if (Math.random() < acceptProb) {
+                        currentT0 = newT0.map(p => [...p]);
+                        currentT1 = newT1.map(p => [...p]);
+                        currentEdges = newEdges;
+                        noImprove = 0;
+                    } else {
+                        noImprove++;
+                    }
+                } else {
+                    noImprove++;
+                }
+                temp *= coolingRate;
+                if (noImprove > SA_MAX_NO_IMPROVE) break;
+            }
+            return { edges: bestEdges, type0: bestT0, type1: bestT1 };
+        }
+
+        // ==================== 局部优化 ====================
+        function localOptimize(type0, type1, k, boundary, maxIter) {
+            let bestEdges = countEdges(type0, type1);
+            let bestT0 = type0.map(p => [...p]);
+            let bestT1 = type1.map(p => [...p]);
+            const n = type0.length + type1.length;
+            const theoreticalBest = k * (n - k);
+
+            let currentT0 = bestT0.map(p => [...p]);
+            let currentT1 = bestT1.map(p => [...p]);
+
+            for (let iter = 0; iter < maxIter; iter++) {
+                let improved = false;
+                const allPoints = [...currentT0, ...currentT1];
+
+                for (let idx = 0; idx < n && !improved; idx++) {
+                    const pos = allPoints[idx];
+                    const others = [...allPoints.slice(0, idx), ...allPoints.slice(idx + 1)];
+
+                    for (let dx = -LOCAL_SEARCH_RANGE; dx <= LOCAL_SEARCH_RANGE && !improved; dx++) {
+                        for (let dy = -LOCAL_SEARCH_RANGE; dy <= LOCAL_SEARCH_RANGE && !improved; dy++) {
+                            if (dx === 0 && dy === 0) continue;
+                            const newPos = [pos[0] + dx, pos[1] + dy];
+                            if (newPos[0] < 0 || newPos[0] > boundary ||
+                                newPos[1] < 0 || newPos[1] > boundary) continue;
+
+                            let overlap = false;
+                            for (const o of others) {
+                                if (isOverlapping(newPos, o)) {
+                                    overlap = true;
+                                    break;
+                                }
+                            }
+                            if (overlap) continue;
+
+                            const newAll = [...others.slice(0, idx), newPos, ...others.slice(idx)];
+                            const newT0 = newAll.slice(0, k);
+                            const newT1 = newAll.slice(k);
+
+                            const newEdges = countEdges(newT0, newT1);
+                            if (newEdges > bestEdges) {
+                                bestEdges = newEdges;
+                                bestT0 = newT0.map(p => [...p]);
+                                bestT1 = newT1.map(p => [...p]);
+                                currentT0 = bestT0.map(p => [...p]);
+                                currentT1 = bestT1.map(p => [...p]);
+                                improved = true;
+                                if (bestEdges >= theoreticalBest) {
+                                    return { edges: bestEdges, type0: bestT0, type1: bestT1 };
+                                }
+                            }
+                        }
+                    }
+                }
+                if (!improved) break;
+            }
+            return { edges: bestEdges, type0: bestT0, type1: bestT1 };
+        }
+
+        // ==================== Solver类 ====================
+        class Solver {
+            constructor(n, k, boundary) {
+                this.n = n;
+                this.k = k;
+                this.m = n - k;
+                this.boundary = boundary;
+            }
+
+            tryDifferentPatterns() {
+                let bestType0 = null, bestType1 = null;
+                let bestEdges = -1;
+
+                for (let ox = 0; ox < 3; ox++) {
+                    for (let oy = 0; oy < 3; oy++) {
+                        const result = this.gridPattern(ox, oy);
+                        if (result) {
+                            const edges = countEdges(result.type0, result.type1);
+                            if (edges > bestEdges) {
+                                bestEdges = edges;
+                                bestType0 = result.type0;
+                                bestType1 = result.type1;
+                            }
+                        }
+                    }
+                }
+
+                const staggered = this.staggeredRows();
+                if (staggered) {
+                    const edges = countEdges(staggered.type0, staggered.type1);
+                    if (edges > bestEdges) {
+                        bestEdges = edges;
+                        bestType0 = staggered.type0;
+                        bestType1 = staggered.type1;
+                    }
+                }
+
+                const dualCol = this.dualColumnPattern();
+                if (dualCol) {
+                    const edges = countEdges(dualCol.type0, dualCol.type1);
+                    if (edges > bestEdges) {
+                        bestEdges = edges;
+                        bestType0 = dualCol.type0;
+                        bestType1 = dualCol.type1;
+                    }
+                }
+
+                const cross = this.crossPattern();
+                if (cross) {
+                    const edges = countEdges(cross.type0, cross.type1);
+                    if (edges > bestEdges) {
+                        bestEdges = edges;
+                        bestType0 = cross.type0;
+                        bestType1 = cross.type1;
+                    }
+                }
+
+                const lStaggered = this.lStaggeredPattern();
+                if (lStaggered) {
+                    const edges = countEdges(lStaggered.type0, lStaggered.type1);
+                    if (edges > bestEdges) {
+                        bestEdges = edges;
+                        bestType0 = lStaggered.type0;
+                        bestType1 = lStaggered.type1;
+                    }
+                }
+
+                if (bestType0) {
+                    return this.normalize(bestType0, bestType1);
+                }
+                return null;
+            }
+
+            gridPattern(ox, oy) {
+                const type0 = [], type1 = [];
+                const points = [];
+                for (let i = 0; i <= Math.floor(this.boundary / 2); i++) {
+                    for (let j = 0; j <= Math.floor(this.boundary / 2); j++) {
+                        points.push([ox + j * 2, oy + i * 2]);
+                        points.push([ox + 1 + j * 2, oy + 1 + i * 2]);
+                    }
+                }
+                for (let i = points.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [points[i], points[j]] = [points[j], points[i]];
+                }
+                for (const p of points) {
+                    if (type0.length + type1.length >= this.n) break;
+                    const used = [...type0, ...type1];
+                    if (used.some(u => isOverlapping(p, u))) continue;
+
+                    const edges0 = type1.reduce((sum, q) => sum + (manhattanDistance(p, q) <= MANHATTAN_THRESHOLD ? 1 : 0), 0);
+                    const edges1 = type0.reduce((sum, q) => sum + (manhattanDistance(p, q) <= MANHATTAN_THRESHOLD ? 1 : 0), 0);
+
+                    if (type0.length < this.k && type1.length < this.m) {
+                        if (edges0 >= edges1) type0.push(p);
+                        else type1.push(p);
+                    } else if (type0.length < this.k) {
+                        type0.push(p);
+                    } else if (type1.length < this.m) {
+                        type1.push(p);
+                    }
+                }
+                if (type0.length === this.k && type1.length === this.m) {
+                    return { type0, type1 };
+                }
+                return null;
+            }
+
+            staggeredRows() {
+                const type0 = [], type1 = [];
+                const row0Points = [];
+                const row1Points = [];
+                for (let i = 0; i <= Math.floor(this.boundary / 2); i++) {
+                    for (let j = 0; j <= Math.floor(this.boundary / 2); j++) {
+                        row0Points.push([j * 2, i * 2]);
+                    }
+                }
+                for (let i = 0; i < Math.floor(this.boundary / 2); i++) {
+                    for (let j = 0; j < Math.floor(this.boundary / 2); j++) {
+                        row1Points.push([1 + j * 2, 1 + i * 2]);
+                    }
+                }
+                const allPoints = [];
+                for (let i = 0; i < Math.max(row0Points.length, row1Points.length); i++) {
+                    if (i < row0Points.length) allPoints.push(row0Points[i]);
+                    if (i < row1Points.length) allPoints.push(row1Points[i]);
+                }
+                for (const p of allPoints) {
+                    if (type0.length + type1.length >= this.n) break;
+                    const used = [...type0, ...type1];
+                    if (used.some(u => isOverlapping(p, u))) continue;
+
+                    const edges0 = type1.reduce((sum, q) => sum + (manhattanDistance(p, q) <= MANHATTAN_THRESHOLD ? 1 : 0), 0);
+                    const edges1 = type0.reduce((sum, q) => sum + (manhattanDistance(p, q) <= MANHATTAN_THRESHOLD ? 1 : 0), 0);
+
+                    if (type0.length < this.k && type1.length < this.m) {
+                        if (edges0 >= edges1) type0.push(p);
+                        else type1.push(p);
+                    } else if (type0.length < this.k) {
+                        type0.push(p);
+                    } else if (type1.length < this.m) {
+                        type1.push(p);
+                    }
+                }
+                if (type0.length === this.k && type1.length === this.m) {
+                    return { type0, type1 };
+                }
+                return null;
+            }
+
+            dualColumnPattern() {
+                const type0 = [], type1 = [];
+                const col1X = 0, col2X = 4;
+                for (let i = 0; i <= Math.floor(this.boundary / 2); i++) {
+                    const p1 = [col1X, i * 2];
+                    const p2 = [col2X, ((i * 2 + 1) % (this.boundary + 1))];
+                    for (const p of [p1, p2]) {
+                        if (type0.length + type1.length >= this.n) break;
+                        if (p[1] > this.boundary) continue;
+                        const used = [...type0, ...type1];
+                        if (used.some(u => isOverlapping(p, u))) continue;
+
+                        const edges0 = type1.reduce((sum, q) => sum + (manhattanDistance(p, q) <= MANHATTAN_THRESHOLD ? 1 : 0), 0);
+                        const edges1 = type0.reduce((sum, q) => sum + (manhattanDistance(p, q) <= MANHATTAN_THRESHOLD ? 1 : 0), 0);
+
+                        if (type0.length < this.k && type1.length < this.m) {
+                            if (edges0 >= edges1) type0.push(p);
+                            else type1.push(p);
+                        } else if (type0.length < this.k) {
+                            type0.push(p);
+                        } else if (type1.length < this.m) {
+                            type1.push(p);
+                        }
+                    }
+                }
+                for (let j = 2; j <= Math.floor(this.boundary / 2); j++) {
+                    if (type0.length + type1.length >= this.n) break;
+                    for (let i = 0; i <= Math.floor(this.boundary / 2); i++) {
+                        const p = [j * 2, i * 2];
+                        if (type0.length + type1.length >= this.n) break;
+                        const used = [...type0, ...type1];
+                        if (used.some(u => isOverlapping(p, u))) continue;
+
+                        const edges0 = type1.reduce((sum, q) => sum + (manhattanDistance(p, q) <= MANHATTAN_THRESHOLD ? 1 : 0), 0);
+                        const edges1 = type0.reduce((sum, q) => sum + (manhattanDistance(p, q) <= MANHATTAN_THRESHOLD ? 1 : 0), 0);
+
+                        if (type0.length < this.k && type1.length < this.m) {
+                            if (edges0 >= edges1) type0.push(p);
+                            else type1.push(p);
+                        } else if (type0.length < this.k) {
+                            type0.push(p);
+                        } else if (type1.length < this.m) {
+                            type1.push(p);
+                        }
+                    }
+                }
+                if (type0.length === this.k && type1.length === this.m) {
+                    return { type0, type1 };
+                }
+                return null;
+            }
+
+            crossPattern() {
+                const type0 = [], type1 = [];
+                const cx = 5, cy = 5;
+                for (let i = 0; i < 5; i++) {
+                    const p = [cx - 4 + i * 2, cy];
+                    if (type0.length === 0 && type1.length === 0) {
+                        type0.push(p);
+                        continue;
+                    }
+                    const used = [...type0, ...type1];
+                    if (used.some(u => isOverlapping(p, u))) continue;
+
+                    const edges0 = type1.reduce((sum, q) => sum + (manhattanDistance(p, q) <= MANHATTAN_THRESHOLD ? 1 : 0), 0);
+                    const edges1 = type0.reduce((sum, q) => sum + (manhattanDistance(p, q) <= MANHATTAN_THRESHOLD ? 1 : 0), 0);
+
+                    if (type0.length < this.k && type1.length < this.m) {
+                        if (edges0 >= edges1) type0.push(p);
+                        else type1.push(p);
+                    } else if (type0.length < this.k) {
+                        type0.push(p);
+                    } else if (type1.length < this.m) {
+                        type1.push(p);
+                    }
+                }
+                for (let i = 0; i < 5; i++) {
+                    if (type0.length + type1.length >= this.n) break;
+                    const p = [cx, cy - 4 + i * 2];
+                    const used = [...type0, ...type1];
+                    if (used.some(u => isOverlapping(p, u))) continue;
+
+                    const edges0 = type1.reduce((sum, q) => sum + (manhattanDistance(p, q) <= MANHATTAN_THRESHOLD ? 1 : 0), 0);
+                    const edges1 = type0.reduce((sum, q) => sum + (manhattanDistance(p, q) <= MANHATTAN_THRESHOLD ? 1 : 0), 0);
+
+                    if (type0.length < this.k && type1.length < this.m) {
+                        if (edges0 >= edges1) type0.push(p);
+                        else type1.push(p);
+                    } else if (type0.length < this.k) {
+                        type0.push(p);
+                    } else if (type1.length < this.m) {
+                        type1.push(p);
+                    }
+                }
+                if (type0.length === this.k && type1.length === this.m) {
+                    return { type0, type1 };
+                }
+                return null;
+            }
+
+            lStaggeredPattern() {
+                const type0 = [], type1 = [];
+                const points = [];
+                for (let i = 0; i <= Math.floor(this.boundary / 2); i++) {
+                    points.push([i * 2, 0]);
+                    points.push([i * 2 + 1, 1]);
+                }
+                for (let i = 1; i <= Math.floor(this.boundary / 2); i++) {
+                    points.push([0, i * 2]);
+                    points.push([1, i * 2 + 1]);
+                }
+                for (let i = 1; i <= Math.floor(this.boundary / 2); i++) {
+                    for (let j = 1; j <= Math.floor(this.boundary / 2); j++) {
+                        if ((i + j) % 2 === 0) {
+                            points.push([j * 2, i * 2]);
+                            points.push([j * 2 + 1, i * 2 + 1]);
+                        }
+                    }
+                }
+                for (const p of points) {
+                    if (type0.length + type1.length >= this.n) break;
+                    if (p[0] < 0 || p[0] > this.boundary || p[1] < 0 || p[1] > this.boundary) continue;
+                    const used = [...type0, ...type1];
+                    if (used.some(u => isOverlapping(p, u))) continue;
+
+                    const edges0 = type1.reduce((sum, q) => sum + (manhattanDistance(p, q) <= MANHATTAN_THRESHOLD ? 1 : 0), 0);
+                    const edges1 = type0.reduce((sum, q) => sum + (manhattanDistance(p, q) <= MANHATTAN_THRESHOLD ? 1 : 0), 0);
+
+                    if (type0.length < this.k && type1.length < this.m) {
+                        if (edges0 >= edges1) type0.push(p);
+                        else type1.push(p);
+                    } else if (type0.length < this.k) {
+                        type0.push(p);
+                    } else if (type1.length < this.m) {
+                        type1.push(p);
+                    }
+                }
+                if (type0.length === this.k && type1.length === this.m) {
+                    return { type0, type1 };
+                }
+                return null;
+            }
+
+            normalize(type0, type1) {
+                const allP = [...type0, ...type1];
+                const minX = Math.min(...allP.map(p => p[0]));
+                const minY = Math.min(...allP.map(p => p[1]));
+                return {
+                    type0: type0.map(p => [p[0] - minX, p[1] - minY]),
+                    type1: type1.map(p => [p[0] - minX, p[1] - minY])
+                };
+            }
+        }
+
+        // ==================== 主求解函数 ====================
+        async function solve(n, k, updateProgress) {
+            const m = n - k;
+            const theoreticalMax = k * m;
+            const boundary = Math.max(BOUNDARY_BASE, Math.ceil(n * BOUNDARY_SCALE));
+
+            updateProgress(5, `初始化 ${n} 个小窝, 雌性=${k}, 雄性=${m}, 边界=${boundary}...`);
+
+            const numAttempts = n <= 10 ? SOLVER_ATTEMPTS_BASE : SOLVER_ATTEMPTS_LARGE;
+
+            let bestType0 = null;
+            let bestType1 = null;
+            let bestScore = 0;
+
+            const solver = new Solver(n, k, boundary);
+
+            for (let attempt = 0; attempt < numAttempts; attempt++) {
+                const progress = 5 + Math.floor((attempt / numAttempts) * 90);
+                updateProgress(progress, `尝试 ${attempt + 1}/${numAttempts} | 当前最优: ${bestScore}/${theoreticalMax}...`);
+
+                const result = solver.tryDifferentPatterns();
+                if (!result) continue;
+
+                let { type0, type1 } = result;
+
+                const saResult = saOptimize(
+                    type0, type1, k, boundary,
+                    SA_INITIAL_TEMP, SA_COOLING_RATE, SA_MIN_TEMP, SA_MAX_ITERATIONS
+                );
+
+                const optResult = localOptimize(
+                    saResult.type0, saResult.type1, k, boundary, LOCAL_MAX_ITERATIONS
+                );
+
+                if (optResult.edges > bestScore) {
+                    bestScore = optResult.edges;
+                    bestType0 = optResult.type0.map(p => [...p]);
+                    bestType1 = optResult.type1.map(p => [...p]);
+
+                    if (bestScore >= theoreticalMax) {
+                        updateProgress(100, `✓ 达到理论最优 ${theoreticalMax}，提前停止`);
+                        break;
+                    }
+                }
+                await new Promise(r => setTimeout(r, 1));
+            }
+
+            const normalized = normalizeCoordinates(bestType0, bestType1);
+            bestType0 = normalized.type0;
+            bestType1 = normalized.type1;
+
+            const reachRate = ((bestScore / theoreticalMax) * 100).toFixed(1);
+            updateProgress(100, `计算完成! 配对数: ${bestScore}/${theoreticalMax} (${reachRate}%)`);
+
+            return {
+                n, k, m,
+                type0: bestType0,
+                type1: bestType1,
+                edges: bestScore,
+                theoretical: theoreticalMax
+            };
+        }
+
+        // ==================== 应用状态 ====================
+        const State = {
+            n: 0,
+            k: 0,
+            m: 0,
+            type0: [],
+            type1: [],
+            originalType0: [],
+            originalType1: [],
+            selected: { type: null, index: null },
+            solving: false,
+            dragging: { active: false, startX: 0, startY: 0, currentX: 0, currentY: 0 }
+        };
+
+        // ==================== UI 函数 ====================
+        function showProgress(show) {
+            const overlay = document.getElementById('progress-overlay');
+            if (show) {
+                overlay.classList.add('visible');
+            } else {
+                setTimeout(() => overlay.classList.remove('visible'), 300);
+            }
+        }
+
+        function updateProgress(percent, text) {
+            document.getElementById('progress-bar-fill').style.width = percent + '%';
+            document.getElementById('progress-text').textContent = text || '正在计算...';
+            document.getElementById('progress-detail').textContent = `进度: ${percent}%`;
+        }
+
+        async function startSolving() {
+            if (State.solving) return;
+
+            const n = parseInt(document.getElementById('input-n').value);
+            const k = parseInt(document.getElementById('input-k').value);
+
+            if (n < 2 || n > 10) {
+                alert('小窝总数必须在 2-10 之间');
+                return;
+            }
+            if (k < 1 || k >= n) {
+                alert('雌性精灵数量必须在 1 到 n-1 之间');
+                return;
+            }
+
+            State.solving = true;
+            document.getElementById('btn-solve').disabled = true;
+            showProgress(true);
+
+            try {
+                const result = await solve(n, k, updateProgress);
+
+                State.n = result.n;
+                State.k = result.k;
+                State.m = result.m;
+                State.type0 = result.type0;
+                State.type1 = result.type1;
+                State.originalType0 = result.type0.map(p => [...p]);
+                State.originalType1 = result.type1.map(p => [...p]);
+
+                updateStats(result);
+                renderVisualization();
+                updateConnectionsList();
+
+                document.getElementById('stats-panel').classList.add('visible');
+                document.getElementById('viz-panel').classList.add('visible');
+                document.getElementById('connections-panel').classList.add('visible');
+
+            } catch (err) {
+                console.error(err);
+                alert('计算出错: ' + err.message);
+            } finally {
+                State.solving = false;
+                document.getElementById('btn-solve').disabled = false;
+                setTimeout(() => showProgress(false), 500);
+            }
+        }
+
+        function updateStats(result) {
+            document.getElementById('stat-n').textContent = result.n;
+            document.getElementById('stat-k').textContent = result.k;
+            document.getElementById('stat-m').textContent = result.m;
+            document.getElementById('stat-edges').textContent = result.edges;
+
+            const ratio = (result.edges / result.theoretical * 100).toFixed(1);
+            document.getElementById('stat-ratio').textContent = ratio + '%';
+
+            const edgesItem = document.getElementById('stat-edges-item');
+            if (result.edges === result.theoretical) {
+                edgesItem.classList.add('optimal');
+            } else {
+                edgesItem.classList.remove('optimal');
+            }
+        }
+
+        function renderVisualization() {
+            const container = document.getElementById('viz-container');
+            container.innerHTML = '';
+
+            // 对 State 进行归一化，让解位于第一象限
+            const normalized = normalizeCoordinates(State.type0, State.type1);
+            State.type0 = normalized.type0;
+            State.type1 = normalized.type1;
+
+            const scale = 50;
+            const n = State.n || (State.type0.length + State.type1.length);
+            const allPoints = [...State.type0, ...State.type1];
+
+            // 计算归一化解的边界（每个方块占2x2网格）
+            let minX = Math.min(...allPoints.map(p => p[0]));
+            let maxX = Math.max(...allPoints.map(p => p[0])) + 2;  // +2 是方块宽度
+            let minY = Math.min(...allPoints.map(p => p[1]));
+            let maxY = Math.max(...allPoints.map(p => p[1])) + 2;  // +2 是方块高度
+
+            // 向四个方向扩展 n/4 的网格
+            const expand = Math.ceil(n / 4);
+            const viewMinX = minX - expand;
+            const viewMaxX = maxX + expand;
+            const viewMinY = minY - expand;
+            const viewMaxY = maxY + expand;
+
+            const width = viewMaxX - viewMinX;
+            const height = viewMaxY - viewMinY;
+
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('width', '100%');
+            svg.setAttribute('height', '100%');
+            svg.setAttribute('viewBox', `${viewMinX * scale - 30} ${-viewMaxY * scale - 30} ${width * scale + 60} ${height * scale + 60}`);
+            svg.style.display = 'block';
+            svg.tabIndex = 0;
+            svg.style.outline = 'none';
+
+            const toSvgX = (x) => x * scale;
+            const toSvgY = (y) => -y * scale;
+
+            // 绘制网格
+            for (let x = viewMinX; x <= viewMaxX; x++) {
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', toSvgX(x));
+                line.setAttribute('y1', toSvgY(viewMinY));
+                line.setAttribute('x2', toSvgX(x));
+                line.setAttribute('y2', toSvgY(viewMaxY));
+                line.setAttribute('stroke', '#e2e8f0');
+                line.setAttribute('stroke-width', '1');
+                svg.appendChild(line);
+            }
+            for (let y = viewMinY; y <= viewMaxY; y++) {
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', toSvgX(viewMinX));
+                line.setAttribute('y1', toSvgY(y));
+                line.setAttribute('x2', toSvgX(viewMaxX));
+                line.setAttribute('y2', toSvgY(y));
+                line.setAttribute('stroke', '#e2e8f0');
+                line.setAttribute('stroke-width', '1');
+                svg.appendChild(line);
+            }
+
+            const linesGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            svg.appendChild(linesGroup);
+
+            const squaresGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            svg.appendChild(squaresGroup);
+
+            function renderLines() {
+                linesGroup.innerHTML = '';
+                for (let i = 0; i < State.type0.length; i++) {
+                    for (let j = 0; j < State.type1.length; j++) {
+                        const d = manhattanDistance(State.type0[i], State.type1[j]);
+                        if (d <= 5) {
+                            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                            line.setAttribute('x1', toSvgX(State.type0[i][0] + 1));
+                            line.setAttribute('y1', toSvgY(State.type0[i][1] + 1));
+                            line.setAttribute('x2', toSvgX(State.type1[j][0] + 1));
+                            line.setAttribute('y2', toSvgY(State.type1[j][1] + 1));
+                            line.setAttribute('stroke', '#48bb78');
+                            line.setAttribute('stroke-width', '3');
+                            line.setAttribute('opacity', '0.6');
+                            linesGroup.appendChild(line);
+                        }
+                    }
+                }
+            }
+
+            function isValidMove(type, index, newPos) {
+                const all = [...State.type0, ...State.type1];
+                const thisIndex = type === 0 ? index : State.type0.length + index;
+                for (let i = 0; i < all.length; i++) {
+                    if (i === thisIndex) continue;
+                    if (isOverlapping(newPos, all[i])) return false;
+                }
+                return true;
+            }
+
+            function moveSquareTo(type, index, newPos) {
+                const points = type === 0 ? State.type0 : State.type1;
+                newPos[0] = Math.max(viewMinX, Math.min(viewMaxX - 2, newPos[0]));
+                newPos[1] = Math.max(viewMinY, Math.min(viewMaxY - 2, newPos[1]));
+
+                if (!isValidMove(type, index, newPos)) {
+                    const square = squaresGroup.querySelector(`[data-type="${type}"][data-index="${index}"]`);
+                    if (square) {
+                        square.classList.add('invalid');
+                        setTimeout(() => square.classList.remove('invalid'), 300);
+                    }
+                    return false;
+                }
+
+                points[index] = newPos;
+                renderLines();
+                renderSquares();
+
+                const newSquare = squaresGroup.querySelector(`[data-type="${type}"][data-index="${index}"]`);
+                if (newSquare) newSquare.classList.add('selected');
+
+                updateStats({
+                    n: State.n,
+                    k: State.k,
+                    m: State.m,
+                    edges: countEdges(State.type0, State.type1),
+                    theoretical: State.k * State.m
+                });
+                updateConnectionsList();
+                return true;
+            }
+
+            function createSquare(p, type, index) {
+                const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                group.setAttribute('class', 'selectable-square');
+                group.style.touchAction = 'none';
+                group.dataset.type = type;
+                group.dataset.index = index;
+
+                const colors = type === 0
+                    ? { fill: 'rgba(236, 112, 99, 0.75)', stroke: '#c0392b' }  // 雌性 - 红色系
+                    : { fill: 'rgba(93, 173, 226, 0.75)', stroke: '#2874a6' };  // 雄性 - 蓝色系
+
+                const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                rect.setAttribute('x', toSvgX(p[0]));
+                rect.setAttribute('y', toSvgY(p[1] + 2));
+                rect.setAttribute('width', 2 * scale);
+                rect.setAttribute('height', 2 * scale);
+                rect.setAttribute('fill', colors.fill);
+                rect.setAttribute('stroke', colors.stroke);
+                rect.setAttribute('stroke-width', '2');
+                rect.setAttribute('rx', '3');
+                group.appendChild(rect);
+
+                const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                circle.setAttribute('cx', toSvgX(p[0] + 1));
+                circle.setAttribute('cy', toSvgY(p[1] + 1));
+                circle.setAttribute('r', '6');
+                circle.setAttribute('fill', colors.stroke);
+                group.appendChild(circle);
+
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', toSvgX(p[0] + 1));
+                text.setAttribute('y', toSvgY(p[1] + 1) + 5);
+                text.setAttribute('text-anchor', 'middle');
+                text.setAttribute('fill', 'white');
+                text.setAttribute('font-size', '14');
+                text.setAttribute('font-weight', 'bold');
+                text.textContent = type === 0 ? '♀' : '♂';
+                group.appendChild(text);
+
+                // 触摸/鼠标事件
+                group.addEventListener('touchstart', handleTouchStart, { passive: false });
+                group.addEventListener('touchmove', handleTouchMove, { passive: false });
+                group.addEventListener('touchend', handleTouchEnd, { passive: false });
+                group.addEventListener('mousedown', handleMouseDown);
+
+                return group;
+            }
+
+            function handleTouchStart(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                const touch = e.touches[0];
+                const target = e.currentTarget;
+                const type = parseInt(target.dataset.type);
+                const index = parseInt(target.dataset.index);
+                selectSquare(type, index);
+                startDrag(touch.clientX, touch.clientY, type, index);
+            }
+
+            function handleTouchMove(e) {
+                e.preventDefault();
+                if (!State.dragging.active) return;
+                const touch = e.touches[0];
+                performDrag(touch.clientX, touch.clientY);
+            }
+
+            function handleTouchEnd(e) {
+                e.preventDefault();
+                endDrag();
+            }
+
+            function handleMouseDown(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                const target = e.currentTarget;
+                const type = parseInt(target.dataset.type);
+                const index = parseInt(target.dataset.index);
+                selectSquare(type, index);
+                startDrag(e.clientX, e.clientY, type, index);
+                document.addEventListener('mousemove', handleMouseMove);
+                document.addEventListener('mouseup', handleMouseUp);
+            }
+
+            function handleMouseMove(e) {
+                e.preventDefault();
+                if (!State.dragging.active) return;
+                performDrag(e.clientX, e.clientY);
+            }
+
+            function handleMouseUp(e) {
+                e.preventDefault();
+                endDrag();
+                document.removeEventListener('mousemove', handleMouseMove);
+                document.removeEventListener('mouseup', handleMouseUp);
+            }
+
+            function selectSquare(type, index) {
+                squaresGroup.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'));
+                State.selected.type = type;
+                State.selected.index = index;
+                const square = squaresGroup.querySelector(`[data-type="${type}"][data-index="${index}"]`);
+                if (square) square.classList.add('selected');
+            }
+
+            function startDrag(clientX, clientY, type, index) {
+                const points = type === 0 ? State.type0 : State.type1;
+                const pos = points[index];
+                State.dragging.active = true;
+                State.dragging.startX = pos[0];
+                State.dragging.startY = pos[1];
+                State.dragging.startClientX = clientX;
+                State.dragging.startClientY = clientY;
+                State.dragging.type = type;
+                State.dragging.index = index;
+            }
+
+            function performDrag(clientX, clientY) {
+                if (!State.dragging.active) return;
+                const rect = svg.getBoundingClientRect();
+                const svgScale = rect.width / (width * scale + 60);
+                const deltaX = (clientX - State.dragging.startClientX) / scale / svgScale;
+                const deltaY = -(clientY - State.dragging.startClientY) / scale / svgScale;
+                const newX = State.dragging.startX + Math.round(deltaX);
+                const newY = State.dragging.startY + Math.round(deltaY);
+                const currentPos = State.dragging.type === 0
+                    ? State.type0[State.dragging.index]
+                    : State.type1[State.dragging.index];
+                if (newX !== currentPos[0] || newY !== currentPos[1]) {
+                    moveSquareTo(State.dragging.type, State.dragging.index, [newX, newY]);
+                }
+            }
+
+            function endDrag() {
+                State.dragging.active = false;
+            }
+
+            function renderSquares() {
+                squaresGroup.innerHTML = '';
+                State.type0.forEach((p, i) => squaresGroup.appendChild(createSquare(p, 0, i)));
+                State.type1.forEach((p, i) => squaresGroup.appendChild(createSquare(p, 1, i)));
+                if (State.selected.type !== null) {
+                    const square = squaresGroup.querySelector(`[data-type="${State.selected.type}"][data-index="${State.selected.index}"]`);
+                    if (square) square.classList.add('selected');
+                }
+            }
+
+            svg.addEventListener('click', (e) => {
+                if (e.target === svg) {
+                    squaresGroup.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'));
+                    State.selected.type = null;
+                    State.selected.index = null;
+                }
+            });
+
+            renderLines();
+            renderSquares();
+            container.appendChild(svg);
+        }
+
+        function updateConnectionsList() {
+            const container = document.getElementById('connections-list');
+            const connections = getConnections(State.type0, State.type1);
+
+            container.innerHTML = connections.map(conn => `
+                <div class="connection-item">
+                    <span>
+                        <span class="type0">♀-${conn.type0Index + 1}</span>
+                        ↔
+                        <span class="type1">♂-${conn.type1Index + 1}</span>
+                    </span>
+                    <span class="dist">d=${conn.distance}</span>
+                </div>
+            `).join('');
+        }
+
+        function resetSolution() {
+            if (State.originalType0.length === 0) return;
+            State.type0 = State.originalType0.map(p => [...p]);
+            State.type1 = State.originalType1.map(p => [...p]);
+            State.selected.type = null;
+            State.selected.index = null;
+            updateStats({
+                n: State.n,
+                k: State.k,
+                m: State.m,
+                edges: countEdges(State.type0, State.type1),
+                theoretical: State.k * State.m
+            });
+            renderVisualization();
+            updateConnectionsList();
+        }
+
+        function exportSolution() {
+            const connections = getConnections(State.type0, State.type1);
+            const exportData = {
+                n: State.n,
+                k: State.k,
+                m: State.m,
+                type0: State.type0,
+                type1: State.type1,
+                edges: countEdges(State.type0, State.type1),
+                theoretical: State.k * State.m,
+                ratio: (countEdges(State.type0, State.type1) / (State.k * State.m) * 100).toFixed(2) + '%',
+                connections: connections
+            };
+            const dataStr = JSON.stringify(exportData, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `洛克王国_小窝排布_n${State.n}_雌${State.k}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function updateType1Count() {
+            const n = parseInt(document.getElementById('input-n').value) || 0;
+            const k = parseInt(document.getElementById('input-k').value) || 0;
+            document.getElementById('input-m').value = Math.max(0, n - k);
+        }
+
+        // ==================== 事件监听 ====================
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('input-n').addEventListener('input', (e) => {
+                const n = parseInt(e.target.value) || 0;
+                const kInput = document.getElementById('input-k');
+                const currentK = parseInt(kInput.value) || 1;
+                if (n >= 2) {
+                    kInput.max = n - 1;
+                    if (currentK >= n) kInput.value = n - 1;
+                }
+                updateType1Count();
+            });
+
+            document.getElementById('input-k').addEventListener('input', updateType1Count);
+            updateType1Count();
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && document.activeElement.tagName === 'INPUT') {
+                document.getElementById('btn-solve').click();
+            }
+        });
+    </script>
+</body>
+</html>
