@@ -5,20 +5,11 @@
   ];
 
   const DEBUG_MANDATORY_PRESET = [
-    { gender: 1, eggGroups: ["动物组"], remark: "异色狼" },
-    { gender: 0, eggGroups: ["动物组", "妖精组"], remark: "异色兔" },
-    { gender: 1, eggGroups: ["巨灵组", "魔力组"], remark: "异色空1" },
-    { gender: 1, eggGroups: ["巨灵组", "魔力组"], remark: "异色空2" }
+    // { gender: 1, eggGroups: ["动物组"], remark: "异色恶魔狼" }
   ];
 
   const DEBUG_OPTIONAL_PRESET = [
-    { gender: 0, eggGroups: ["动物组", "巨灵组"], remark: "雪熊", reusable: 2 },
-    { gender: 1, eggGroups: ["动物组", "妖精组"], remark: "兔兔", reusable: 2 },
-    { gender: 0, eggGroups: ["拟人组", "妖精组"], remark: "异色帽兜", reusable: 1 },
-    { gender: 0, eggGroups: ["动物组"], remark: "火马", reusable: 2 },
-    { gender: 1, eggGroups: ["拟人组", "机械组"], remark: "异色方方", reusable: 1 },
-    { gender: 0, eggGroups: ["动物组"], remark: "猪", reusable: 2 },
-    { gender: 0, eggGroups: ["机械组"], remark: "贝瑟", reusable: 2 }
+    // { gender: 0, eggGroups: ["动物组", "巨灵组"], remark: "月牙雪熊", reusable: 2 }
   ];
 
   const DEBUG_ONLY_FROM_OPTIONAL = false;
