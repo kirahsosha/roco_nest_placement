@@ -1,0 +1,388 @@
+﻿/* Local modifications only: mandatory sprite panel and refined states */
+
+:root {
+  --patch-border: #e2e8f0;
+  --patch-border-soft: #cbd5e0;
+  --patch-text: #4a5568;
+  --patch-text-muted: #718096;
+  --patch-text-soft: #a0aec0;
+  --patch-text-strong: #2d3748;
+  --patch-focus: #667eea;
+  --patch-focus-ring: 0 0 0 2px rgba(102, 126, 234, 0.12);
+  --patch-bg: #f7fafc;
+  --patch-bg-alt: #f8fbff;
+  --patch-bg-muted: #edf2f7;
+  --patch-blue-bg: #ebf8ff;
+  --patch-blue: #2b6cb0;
+  --patch-blue-border: #bee3f8;
+  --patch-red-bg: #fff5f5;
+  --patch-red: #e53e3e;
+  --patch-red-border: #fed7d7;
+  --patch-green-bg: #f0fff4;
+  --patch-green-border: #c6f6d5;
+  --patch-green: #276749;
+  --patch-blue-panel: #2c5282;
+  --patch-row-shadow: 0 1px 6px rgba(45, 55, 72, 0.06);
+  --patch-dropdown-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  --patch-transition: 0.15s;
+}
+
+.mandatory-section {
+  margin-top: 16px;
+  border-top: 1px solid var(--patch-border);
+  border-radius: 10px;
+  padding: 14px 10px 0;
+  background: linear-gradient(180deg, rgba(247, 250, 252, 0.55) 0%, rgba(255, 255, 255, 0) 100%);
+}
+
+.mandatory-header,
+.optional-controls {
+  display: flex;
+  align-items: center;
+}
+
+.mandatory-header {
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  margin-bottom: 8px;
+  padding: 0 2px;
+}
+
+.mandatory-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--patch-text);
+}
+
+.mandatory-hint {
+  margin-left: 6px;
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--patch-text-soft);
+}
+
+.btn-add-sprite,
+.btn-remove-sprite {
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--patch-transition);
+}
+
+.btn-add-sprite {
+  padding: 6px 14px;
+  border: 1px solid var(--patch-blue-border);
+  background: var(--patch-blue-bg);
+  color: var(--patch-blue);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.btn-add-sprite:hover {
+  background: var(--patch-blue-border);
+  transform: translateY(-1px);
+}
+
+.mandatory-list {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 0 2px;
+}
+
+.mandatory-sprite-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 8px;
+  border: 1px solid var(--patch-border);
+  border-radius: 8px;
+  background: var(--patch-bg);
+  transition: border-color var(--patch-transition), box-shadow var(--patch-transition);
+}
+
+.mandatory-sprite-row:hover {
+  border-color: var(--patch-border-soft);
+  box-shadow: var(--patch-row-shadow);
+}
+
+.optional-sprite-row {
+  background: var(--patch-bg-alt);
+}
+
+.sprite-label {
+  min-width: 36px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--patch-text-muted);
+}
+
+.gender-toggle,
+.optional-reuse-stepper {
+  display: flex;
+  overflow: hidden;
+  border: 1px solid var(--patch-border);
+  border-radius: 6px;
+  background: #fff;
+}
+
+.gender-btn,
+.optional-reuse-step-btn {
+  border: none;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.gender-btn {
+  padding: 5px 12px;
+  background: var(--patch-bg-muted);
+  color: var(--patch-text-muted);
+  font-size: 14px;
+  transition: all var(--patch-transition);
+}
+
+.gender-btn.active-female {
+  background: rgba(236, 112, 99, 0.85);
+  color: #fff;
+  font-weight: 700;
+}
+
+.gender-btn.active-male {
+  background: rgba(93, 173, 226, 0.85);
+  color: #fff;
+  font-weight: 700;
+}
+
+.sprite-remark-input,
+.egg-group-trigger,
+.optional-reuse-label input[type="number"] {
+  background: #fff;
+  font-size: 12px;
+  color: var(--patch-text);
+  outline: none;
+  transition: border-color var(--patch-transition), box-shadow var(--patch-transition);
+}
+
+.sprite-remark-input,
+.egg-group-trigger {
+  padding: 6px 10px;
+  border: 1px solid var(--patch-border);
+  border-radius: 6px;
+}
+
+.sprite-remark-input {
+  flex: 1 1 110px;
+  min-width: 100px;
+  max-width: 150px;
+}
+
+.sprite-remark-input:focus,
+.egg-group-trigger:focus,
+.optional-reuse-label input[type="number"]:focus {
+  box-shadow: var(--patch-focus-ring);
+}
+
+.sprite-remark-input:focus,
+.egg-group-trigger:focus {
+  border-color: var(--patch-focus);
+}
+
+.egg-group-wrapper {
+  position: relative;
+  flex: 1 1 175px;
+  min-width: 130px;
+}
+
+.egg-group-trigger {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  cursor: pointer;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.egg-group-trigger.empty,
+.optional-check-label:has(input[disabled]) {
+  color: var(--patch-text-soft);
+}
+
+.egg-group-trigger.has-error {
+  border-color: var(--patch-red);
+}
+
+.egg-group-dropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 500;
+  min-width: 180px;
+  max-height: 260px;
+  overflow-y: auto;
+  padding: 6px 0;
+  border: 1px solid var(--patch-border);
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: var(--patch-dropdown-shadow);
+}
+
+.egg-group-dropdown.open {
+  display: block;
+}
+
+.egg-group-option,
+.optional-reuse-label,
+.optional-check-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.egg-group-option {
+  width: 100%;
+  padding: 7px 12px;
+  font-size: 13px;
+  color: var(--patch-text-strong);
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.egg-group-option:hover {
+  background: var(--patch-bg);
+}
+
+.egg-group-option input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  cursor: pointer;
+}
+
+.btn-remove-sprite {
+  flex-shrink: 0;
+  padding: 5px 10px;
+  border: 1px solid var(--patch-red-border);
+  background: var(--patch-red-bg);
+  color: var(--patch-red);
+  font-size: 12px;
+}
+
+.btn-remove-sprite:hover {
+  background: var(--patch-red-border);
+  transform: translateY(-1px);
+}
+
+.optional-info,
+.optional-pool-info {
+  margin-top: 8px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.optional-info {
+  margin-top: 10px;
+  border: 1px solid var(--patch-green-border);
+  background: var(--patch-green-bg);
+  color: var(--patch-green);
+}
+
+.optional-info.invalid {
+  border-color: var(--patch-red-border);
+  background: var(--patch-red-bg);
+  color: #c53030;
+}
+
+.optional-sprites-section {
+  margin-top: 12px;
+  border-top: 1px dashed var(--patch-border-soft);
+  padding: 12px 2px 0;
+}
+
+.optional-reuse-label,
+.optional-check-label {
+  font-size: 12px;
+  color: var(--patch-text-strong);
+  white-space: nowrap;
+}
+
+.optional-reuse-text {
+  font-weight: 600;
+  color: var(--patch-text);
+}
+
+.optional-reuse-step-btn {
+  width: 26px;
+  min-width: 26px;
+  background: var(--patch-bg-muted);
+  color: var(--patch-text);
+  font-size: 14px;
+  font-weight: 700;
+  transition: background var(--patch-transition), color var(--patch-transition);
+}
+
+.optional-reuse-step-btn:hover {
+  background: var(--patch-border);
+  color: var(--patch-text-strong);
+}
+
+.optional-reuse-label input[type="number"] {
+  width: 52px;
+  min-width: 52px;
+  padding: 5px 6px;
+  border: none;
+  border-left: 1px solid var(--patch-border);
+  border-right: 1px solid var(--patch-border);
+  text-align: center;
+}
+
+.optional-controls {
+  gap: 12px;
+  margin-top: 10px;
+  padding: 0 2px;
+}
+
+.optional-check-label input[disabled] {
+  cursor: not-allowed;
+}
+
+.optional-pool-info {
+  border: 1px solid var(--patch-blue-border);
+  background: var(--patch-blue-bg);
+  color: var(--patch-blue-panel);
+}
+
+@media (max-width: 480px) {
+  .mandatory-section {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+  .mandatory-sprite-row {
+    padding: 10px 8px;
+  }
+
+  .sprite-remark-input {
+    min-width: 110px;
+  }
+
+  .egg-group-wrapper {
+    min-width: 100%;
+  }
+
+  .optional-reuse-label input[type="number"] {
+    width: 48px;
+    min-width: 48px;
+  }
+
+  .optional-reuse-step-btn {
+    width: 24px;
+    min-width: 24px;
+  }
+}

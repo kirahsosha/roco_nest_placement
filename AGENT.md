@@ -11,20 +11,22 @@
 
 **核心问题**：在平面中放置 n 个 2×2 的小窝（k 个雌性 ♀、m 个雄性 ♂），使得异性小窝中心曼哈顿距离 ≤ 5 的配对数最大化，同时满足小窝之间不重叠（切比雪夫距离 ≥ 2）的约束。
 
-**代码形态**：单文件 HTML 应用（`index.html`），内嵌 CSS 和 JavaScript，可直接在浏览器中打开运行。
+**代码形态**：原生前端应用，可直接在浏览器中打开运行。当前以 `index.html` 为主入口，upstream 核心仍主要保留在 HTML 内联脚本中，本地补丁逻辑拆分到 `app.js` 与 `styles.css`。
 
 ---
 
 ## 📁 文件结构
 
 ```
-out/
-├── index.html      # 完整的单文件应用（约 71KB）
+./
+├── index.html      # 主入口；包含 upstream HTML、内联核心样式与核心脚本
+├── app.js          # 本地补丁逻辑（IIFE 包裹）
+├── styles.css      # 本地补丁样式
 ├── README.md       # 用户友好的项目说明文档
 └── AGENT.md        # 本文件 - 技术优化指南
 ```
 
-> ⚠️ **重要**：所有功能代码都在 `index.html` 中。没有外部依赖，没有分包，没有构建流程。
+> ⚠️ **重要**：所有功能代码都在 `index.html` / `app.js` / `styles.css` 中。没有外部依赖，没有分包，没有构建流程。
 
 ---
 
@@ -36,18 +38,22 @@ out/
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <!-- 完整的 CSS 样式（内联） -->
+    <!-- upstream 内联样式 -->
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <!-- UI 结构 -->
     <script>
-        // JavaScript 代码
+        // upstream 内联核心脚本
     </script>
+    <script src="app.js"></script>
 </body>
 </html>
 ```
 
 ### 2. JavaScript 模块划分
+
+> 说明：以下分区描述主要对应 `index.html` 中保留的 upstream 内联核心脚本。`app.js` 负责本地补丁层，例如必选/可选精灵配置、蛋组校验补充、结果角标、连线过滤与调试预设注入。
 
 代码按逻辑分为以下几个部分（按出现顺序）：
 
@@ -170,14 +176,14 @@ solve(n, k)
 
 ### 1. 文件体积控制
 
-当前 `index.html` 约 71KB。如需添加更多功能，注意控制文件大小，避免浏览器加载过慢。
+当前主体体积仍集中在 `index.html`，但本地增量代码已拆到 `app.js` / `styles.css`。如需继续加功能，优先放在补丁文件中，避免继续放大主 HTML。
 
-### 2. 单文件限制
+### 2. 原生前端限制
 
 - 没有模块化系统（import/export）
-- 所有变量/函数都在全局作用域
-- 修改时注意命名冲突
-- 函数定义顺序很重要 - 后面的函数可以调用前面的，反之可能导致 "未定义" 错误
+- `index.html` 内联核心仍主要运行在全局作用域；`app.js` 使用 IIFE 包裹，本地补丁默认不暴露到 `window`
+- 修改时注意区分 upstream 全局函数与补丁层覆盖/包装逻辑
+- 函数定义顺序很重要，尤其是 `index.html` 内联核心与 `app.js` 覆盖点的加载顺序
 
 ### 3. SVG 坐标系
 
@@ -197,13 +203,16 @@ const toSvgY = (y) => -y * scale;          // Y轴翻转（屏幕坐标）
 
 修改后建议检查：
 ```bash
-# 提取 JS 并检查括号平衡
+# 先检查本地补丁脚本
+node -c app.js
+
+# 如修改了 index.html 内联核心，再额外提取脚本检查括号平衡
 python3 -c "
 import re
-with open('index.html') as f:
-    js = re.search(r'<script>(.*?)</script>', f.read(), re.DOTALL).group(1)
-print(f'Brackets: {js.count(chr(123))} open, {js.count(chr(125))} close')
-print(f'Parens: {js.count(chr(40))} open, {js.count(chr(41))} close')
+with open('index.html', encoding='utf-8') as f:
+    scripts = re.findall(r'<script>(.*?)</script>', f.read(), re.DOTALL)
+for i, js in enumerate(scripts, 1):
+    print(f'script#{i}: braces={js.count(chr(123))}/{js.count(chr(125))}, parens={js.count(chr(40))}/{js.count(chr(41))}')
 "
 ```
 
